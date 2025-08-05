@@ -57,7 +57,7 @@ public class ProductController {
     @DeleteMapping("/product/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id){
         Product product = productService.getProductById(id);
-        if(product!=null){
+        if(product!=null && id!=0){
             productService.deleteProduct(id);
             return new ResponseEntity<>("Product Deleted" , HttpStatus.OK);
         }
