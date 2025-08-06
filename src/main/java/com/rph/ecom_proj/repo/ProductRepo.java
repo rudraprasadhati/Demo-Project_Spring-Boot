@@ -1,10 +1,9 @@
 package com.rph.ecom_proj.repo;
 
 import com.rph.ecom_proj.model.Product;
-import jakarta.persistence.Id;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product , Integer> {
+public interface ProductRepo extends MongoRepository<Product , Integer> {
 }
