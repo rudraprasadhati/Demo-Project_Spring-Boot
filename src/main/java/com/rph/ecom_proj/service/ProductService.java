@@ -4,7 +4,6 @@ import com.rph.ecom_proj.model.Product;
 import com.rph.ecom_proj.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -32,4 +31,5 @@ public class ProductService {
     public void deleteProduct(int id) {
         productRepo.deleteById(id);
     }
+
 }
