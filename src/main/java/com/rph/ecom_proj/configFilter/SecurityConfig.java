@@ -1,24 +1,27 @@
-package com.rph.ecom_proj.config;
+package com.rph.ecom_proj.configFilter;
 
 import com.rph.ecom_proj.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import java.net.http.HttpRequest;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtFilter jwtFilter;
 
     //Configured login page
     @Bean
@@ -30,17 +33,29 @@ public class SecurityConfig {
 //        // http.formLogin(Customizer.withDefaults()); //For web form login //Disabled it by commenting because of the reason stated below(above the return statement).
 //        http.httpBasic(Customizer.withDefaults()); //For tools like postman dealing with REST apis
 //        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//        //Create a stateless api. In an stateless api , the api request will contain all the necessary information to get through the server without maintaining a single session id. So it will create a session id everytime we login.
+//        //Create a stateless api. In a stateless api , the api request will contain all the necessary information to get through the server without maintaining a single session id. So it will create a session id everytime we login.
 //        //For the above thing to work without maintaining a single session id , we have to disable the form login of the web.
 //
 //        return http.build();
 
         //The above thing can be also written in form of a builder pattern like the following:
+//        return http
+//                .csrf(customizer -> customizer.disable())
+//                .authorizeHttpRequests(request -> request.anyRequest().authenticated())
+//                .httpBasic(Customizer.withDefaults())
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .build();
+
+        //Here we are implementing the same thing written above but with authentication removed from the register and login page.
         return http
                 .csrf(customizer -> customizer.disable())
-                .authorizeHttpRequests(request -> request.anyRequest().authenticated())
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("register" , "login") //States the page in which we don't require an authentication.
+                        .permitAll() //Permits all the above pages without authentication.
+                        .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter , UsernamePasswordAuthenticationFilter.class) //Before the authentication , we have to go through more 2 filters which are the JWT and other one is the username-password filter.
                 .build();
 
     }
@@ -55,6 +70,14 @@ public class SecurityConfig {
         provider.setPasswordEncoder(new BCryptPasswordEncoder(12)); //Password encryption
         provider.setUserDetailsService(userService); //setUserDetailsService() is deprecated
         return provider;
+    }
+
+    //While working with JWT we have to process a JWT token from the authentication manager.
+    //So for which we have to configure the default authentication manager and create our own configuration manager.
+    //This authentication manager will talk to the authentication provider.
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
 }

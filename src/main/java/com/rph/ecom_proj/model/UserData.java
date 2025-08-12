@@ -36,6 +36,8 @@ public class UserData {
         this.password = password;
     }
 
+    //When we create and object of this class and try to print it , it gives the output as something like the class name and a set of characters appended to it.
+    //So to get the output in the form of that class's data member types , we use the toString() method.
     @Override
     public String toString() {
         return "UserData{" +

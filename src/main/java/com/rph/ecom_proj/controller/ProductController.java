@@ -6,14 +6,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
+//Annotations in Java/Spring-Boot give extra properties and highlights the thing it is implemented on.
+
+//This package named as controller is a part of MVC(Model View Controller) architecture in which different class handles different operations for the web.
+//The flow goes like this: controller -> service -> repository
+//These classes acts a layer while dealing with data and are called as servlets.
+//Their function are as follows:
+//Controller: manages the API requests.
+//Service: manages the business logic.
+//Repository: it acts like a bridge for managing the data from the server to database and vice versa.
+//Different servlets have their own specialised annotations which gives them certain properties and resides them in the IOC container.
+
+//As mentioned above this class deals with the API requests implementing the CRUD operations of REST API.
 
 @RestController
 @RequestMapping("/api")
 public class ProductController {
 
-    @Autowired
+    @Autowired //@Autowired annotation is used for creating an object of a class inside another class by only an object reference. The whole process is called as dependency injection.
     private ProductService productService;
 
     @RequestMapping("/product")
