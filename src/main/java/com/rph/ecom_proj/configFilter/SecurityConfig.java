@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -47,6 +48,18 @@ public class SecurityConfig {
 //                .build();
 
         //Here we are implementing the same thing written above but with authentication removed from the register and login page.
+//        return http
+//                .csrf(customizer -> customizer.disable())
+//                .authorizeHttpRequests(request -> request
+//                        .requestMatchers("register" , "login") //States the page in which we don't require an authentication.
+//                        .permitAll() //Permits all the above pages without authentication.
+//                        .anyRequest().authenticated())
+//                .httpBasic(Customizer.withDefaults())
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .addFilterBefore(jwtFilter , UsernamePasswordAuthenticationFilter.class) //Before the authentication , we have to go through more 2 filters which are the JWT and other one is the username-password filter.
+//                .build();
+
+        //Here we are implementing Oauth2 login.
         return http
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
@@ -54,8 +67,10 @@ public class SecurityConfig {
                         .permitAll() //Permits all the above pages without authentication.
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) //Here we have changed it from stateless to if-required compared to the above commented code because we need it to save the session id where-ever required.
                 .addFilterBefore(jwtFilter , UsernamePasswordAuthenticationFilter.class) //Before the authentication , we have to go through more 2 filters which are the JWT and other one is the username-password filter.
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())) //Oauth2 authentication. //We have also use the function successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) to save our session.
                 .build();
 
     }

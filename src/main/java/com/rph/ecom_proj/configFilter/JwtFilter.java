@@ -32,7 +32,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
-        //example of a actual Bearer token which is passed behind the scenes:
+        //Example of an actual Bearer token which is passed behind the scenes:
         //Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXJpIiwiaWF0IjoxNzU1MDAyMjQzLCJleHAiOjE3NTUwMDIzNTF9.P2cdkr0ACJHKisxQPzIak01EQXPAdA3bp3gcNdbxu9s
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             token = authHeader.substring(7); //The bearer token's token start at the index number 7. You can refer to the example given above.
