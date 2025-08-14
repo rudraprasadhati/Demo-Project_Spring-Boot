@@ -63,7 +63,7 @@ public class SecurityConfig {
         return http
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("register" , "login") //States the page in which we don't require an authentication.
+                        .requestMatchers("/register" , "/login") //States the page in which we don't require an authentication.
                         .permitAll() //Permits all the above pages without authentication.
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
