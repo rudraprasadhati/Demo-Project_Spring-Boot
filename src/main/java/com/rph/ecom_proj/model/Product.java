@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Document(collection = "RPH") //Maps to the column called as collection in Mongo data-base.
+@Document(collection = "Product") //Maps to the column called as collection in Mongo data-base.
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

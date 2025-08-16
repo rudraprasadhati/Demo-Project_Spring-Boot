@@ -9,16 +9,19 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -65,12 +68,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/register" , "/login") //States the page in which we don't require an authentication.
                         .permitAll() //Permits all the above pages without authentication.
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)) //Here we have changed it from stateless to if-required compared to the above commented code because we need it to save the session id where-ever required.
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()) //All mappings should be authenticated.
+                //.httpBasic(Customizer.withDefaults()) //Disabled the basic authorization using username and password to access the api.
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter , UsernamePasswordAuthenticationFilter.class) //Before the authentication , we have to go through more 2 filters which are the JWT and other one is the username-password filter.
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())) //Oauth2 authentication. //We have also use the function successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) to save our session.
+                        .successHandler(new SavedRequestAwareAuthenticationSuccessHandler())) //Oauth2 authentication. //We have also used the function successHandler(new SavedRequestAwareAuthenticationSuccessHandler()) to save our session.
                 .build();
 
     }
@@ -80,9 +84,14 @@ public class SecurityConfig {
     private UserService userService;
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder){
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(); //DaoAuthenticationProvider used to return the object of AuthenticationProvider //DaoAuthenticationProvider() is deprecated
-        provider.setPasswordEncoder(new BCryptPasswordEncoder(12)); //Password encryption
+        provider.setPasswordEncoder(passwordEncoder); //Password encryption
         provider.setUserDetailsService(userService); //setUserDetailsService() is deprecated
         return provider;
     }

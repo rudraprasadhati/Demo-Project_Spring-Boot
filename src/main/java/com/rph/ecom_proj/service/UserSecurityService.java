@@ -4,6 +4,7 @@ import com.rph.ecom_proj.model.UserData;
 import com.rph.ecom_proj.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,12 +31,18 @@ public class UserSecurityService {
     JWTService jwtService;
 
     public String verify(UserData userData) {
-        Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userData.getUsername() , userData.getPassword()));
-        if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(userData.getUsername());
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userData.getUsername(), userData.getPassword()));
+
+            if (authentication.isAuthenticated()) {
+                return jwtService.generateToken(userData.getUsername());
+            }
+        } catch (Exception e) {
+            throw new BadCredentialsException("Invalid username or password");
         }
-        return "Fail";
+        return null;
     }
+
 
 }

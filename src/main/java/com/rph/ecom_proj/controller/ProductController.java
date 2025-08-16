@@ -5,6 +5,7 @@ import com.rph.ecom_proj.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
 
 //As mentioned above this class deals with the API requests implementing the CRUD operations of REST API.
 
+@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api")
 public class ProductController {
@@ -28,12 +30,12 @@ public class ProductController {
     @Autowired //@Autowired annotation is used for creating an object of a class inside another class by only an object reference. The whole process is called as dependency injection.
     private ProductService productService;
 
-    @RequestMapping("/product")
+    @GetMapping("/product")
     public ResponseEntity<List<Product>> getAllProducts(){
         return new ResponseEntity<>(productService.getAllProducts() , HttpStatus.OK);
     }
 
-    @RequestMapping("/product/{id}")
+    @GetMapping("/product/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable int id){
         Product product = productService.getProductById(id);
         if(product!=null){
@@ -44,6 +46,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/product")
     public ResponseEntity<?> postProduct(@RequestBody Product product){
         try{
@@ -55,6 +58,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/product/{id}")
     public ResponseEntity<String> updateProduct(@PathVariable int id , @RequestBody Product product){
         Product product1 = productService.updateProduct(id , product);
@@ -66,6 +70,7 @@ public class ProductController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/product/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id){
         Product product = productService.getProductById(id);
